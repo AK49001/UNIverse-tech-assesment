@@ -26,3 +26,8 @@ def test_generate_embeddings_invalid_input():
         generate_embedding(mock_client)
 
     assert "Input texts must be a list"
+
+
+if __name__ == '__main__':
+    unittest.main()
+
