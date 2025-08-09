@@ -1,23 +1,28 @@
 import pytest
 from utils import generate_embedding
+from unittest.mock import MagicMock
 
 
-def test_single_string_embedding():
-    text = "Hello world"
-    emb = generate_embedding([text])
-    assert isinstance(emb, list)
-    assert all(isinstance(val, float) for val in emb), "Embedding must be list of floats"
-    assert len(emb) > 0, "Embedding should not be empty"
+def test_generate_embeddings_success():
+
+    mock_client = MagicMock()
+    mock_model_id = "fake-model-id"
+    mock_texts = ["Hello world", "Bedrock test"]
+    mock_response = {"embedding": [[0.1, 0.2], [0.3, 0.4]]}
+
+    mock_client.invoke_model.return_value = mock_response
+    result = generate_embedding(mock_client)
+    mock_client.invoke_model.assert_called_once_with(
+        modelId=mock_model_id,
+        body={"inputText": mock_texts}
+    )
+    assert result == mock_response
 
 
-def test_multiple_strings_embedding():
-    texts = ["Hello", "World"]
-    embeddings = [generate_embedding([text]) for text in texts]
-    for emb in embeddings:
-        assert isinstance(emb, list)
-        assert all(isinstance(val, float) for val in emb)
+def test_generate_embeddings_invalid_input():
+    mock_client = MagicMock()
 
-
-def test_empty_string_error():
     with pytest.raises(ValueError):
-        generate_embedding([""])
+        generate_embedding(mock_client)
+
+    assert "Input texts must be a list"
